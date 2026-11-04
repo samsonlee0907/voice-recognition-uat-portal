@@ -80,7 +80,7 @@ class BrowserTests(unittest.TestCase):
         for item in bank["cases"]:
             page.locator("#uat-case").select_option(item["id"])
             prompt = page.locator("#realtime-instructions").input_value()
-            self.assertIn("2026-11-04.1", prompt)
+            self.assertIn("2026-11-04.2", prompt)
             self.assertLessEqual(len(prompt), 4000)
             self.assertIn(bank["groups"][item["group"]]["question"], prompt)
             if item["group"] == "zodiac":

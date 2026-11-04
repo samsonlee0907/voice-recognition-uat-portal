@@ -8,7 +8,7 @@ class Settings:
         self.portal_username = os.getenv("PORTAL_USERNAME")
         self.portal_password_hash = os.getenv("PORTAL_PASSWORD_HASH")
         self.portal_session_secret = os.getenv("PORTAL_SESSION_SECRET")
-        self.app_version = os.getenv("APP_VERSION", "recognition-uat-20261104-r1")
+        self.app_version = os.getenv("APP_VERSION", "recognition-uat-20261104-r2")
         self.local_http = os.getenv("ALLOW_INSECURE_LOCALHOST", "false").lower() == "true"
         if not re.fullmatch(r"[A-Za-z0-9._-]{1,128}", self.app_version):
             raise RuntimeError("APP_VERSION must be a short ASCII version identifier")

@@ -78,7 +78,7 @@ class NativeRealtimeProvider(FakeProvider):
             self.incoming.put_nowait({"type": "response.done", "response": {
                 **response, "status": "completed", "output": [*self.extra_output, {
                     "type": "function_call", "name": "report_recognition", "arguments": json.dumps(
-                        self.result if self.result is not None else {"heard_text": "C I 六十三", "formatted_text": "CI63"}
+                        self.result if self.result is not None else {"heard_text": "D E M O 六十三", "formatted_text": "DEMO63"}
                     ),
                 }],
             }})
@@ -196,15 +196,15 @@ class ComparisonTests(unittest.IsolatedAsyncioTestCase):
     async def test_luna_processing_is_stateless_separate_and_correlated_to_each_raw_row(self):
         await self.start()
         for lane in (self.bridge.lanes["speech"],):
-            for row, raw in ((2, "C I 六十三"), (1, "x q v r nine p")):
+            for row, raw in ((2, "D E M O 六十三"), (1, "x q v r nine p")):
                 lane.pending[str(row)] = Pending(row, committed=True, text=raw)
                 await self.bridge.finish(lane, str(row))
         await until(lambda: len([e for e in self.browser.events if e["type"] == "compare.processed" and e["status"] == "done"]) == 2)
         for lane in ("speech",):
             final = [e for e in self.browser.events if e["type"] == "compare.processed" and e["status"] == "done" and e["lane"] == lane]
-            self.assertEqual([(e["row"], e["text"]) for e in final], [(2, "CI63"), (1, "XQVR9P")])
+            self.assertEqual([(e["row"], e["text"]) for e in final], [(2, "DEMO63"), (1, "XQVR9P")])
             raw = [e["text"] for e in self.browser.events if e["type"] == "compare.transcript" and e["lane"] == lane]
-            self.assertEqual(raw, ["C I 六十三", "x q v r nine p"])
+            self.assertEqual(raw, ["D E M O 六十三", "x q v r nine p"])
         requests = [event["response"] for event in self.voice[0].sent if event["type"] == "response.create"]
         self.assertEqual(len(requests), 2)
         for body in requests:
@@ -213,18 +213,18 @@ class ComparisonTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(body["tools"], [FORMAT_TOOL])
             self.assertEqual(body["tool_choice"]["name"], FORMAT_TOOL["name"])
             self.assertNotIn("previous_response_id", body)
-            self.assertIn(body["input"][0]["content"][0]["text"], ("C I 六十三", "x q v r nine p"))
+            self.assertIn(body["input"][0]["content"][0]["text"], ("D E M O 六十三", "x q v r nine p"))
         self.assertFalse(any(url.endswith("/responses") for url, _ in self.http.requests))
 
     async def test_native_generated_fragments_are_separate_and_never_reformatted_by_luna(self):
         await self.start()
-        for kind, text in (("session.input_transcript.delta", "C I 六十三"), ("session.output_transcript.delta", "CI63")):
+        for kind, text in (("session.input_transcript.delta", "D E M O 六十三"), ("session.output_transcript.delta", "DEMO63")):
             self.live.incoming.put_nowait({"type": kind, "delta": text, "start_ms": 100, "end_ms": 200})
         await until(lambda: any(e["type"] == "compare.native.processed" for e in self.browser.events))
         raw = next(e for e in self.browser.events if e["type"] == "compare.fragment")
         processed = next(e for e in self.browser.events if e["type"] == "compare.native.processed")
-        self.assertEqual(raw["rows"][0]["raw"], "C I 六十三")
-        self.assertEqual(processed["rows"][0]["raw"], "CI63")
+        self.assertEqual(raw["rows"][0]["raw"], "D E M O 六十三")
+        self.assertEqual(processed["rows"][0]["raw"], "DEMO63")
         self.assertFalse(any(url.endswith("/responses") for url, _ in self.http.requests))
 
     async def test_empty_transcript_is_not_sent_to_luna(self):
@@ -242,14 +242,14 @@ class ComparisonTests(unittest.IsolatedAsyncioTestCase):
         self.bridge.postprocessor = fail
         await self.start()
         lane = self.bridge.lanes["speech"]
-        lane.pending["failed"] = Pending(1, committed=True, text="C I 六十三")
+        lane.pending["failed"] = Pending(1, committed=True, text="D E M O 六十三")
         await self.bridge.finish(lane, "failed")
         await until(lambda: any(e["type"] == "compare.processed" and e["status"] == "failed" for e in self.browser.events))
         self.assertEqual(lane.status, "ready")
         self.assertEqual(self.bridge.lanes["realtime"].status, "ready")
-        self.assertEqual(next(e["text"] for e in self.browser.events if e["type"] == "compare.transcript"), "C I 六十三")
+        self.assertEqual(next(e["text"] for e in self.browser.events if e["type"] == "compare.transcript"), "D E M O 六十三")
         self.bridge.postprocessor = None
-        lane.pending["next"] = Pending(2, committed=True, text="C I 六十三")
+        lane.pending["next"] = Pending(2, committed=True, text="D E M O 六十三")
         await self.bridge.finish(lane, "next")
         await until(lambda: any(e.get("status") == "done" and e.get("row") == 2 for e in self.browser.events))
 
@@ -257,7 +257,7 @@ class ComparisonTests(unittest.IsolatedAsyncioTestCase):
         for calls, characters, turns in ((60, 0, 1), (0, 24000, 1), (0, 0, 9)):
             lane = Lane("speech", process_calls=calls, process_characters=characters)
             for row in range(1, turns + 1):
-                lane.pending[str(row)] = Pending(row, committed=True, text="C I 六十三")
+                lane.pending[str(row)] = Pending(row, committed=True, text="D E M O 六十三")
                 await self.bridge.finish(lane, str(row))
             self.assertEqual(self.browser.events[-1]["status"], "failed")
             self.assertIn("上限", self.browser.events[-1]["message"])
@@ -274,7 +274,7 @@ class ComparisonTests(unittest.IsolatedAsyncioTestCase):
         await self.start()
         lane = self.bridge.lanes["speech"]
         for row in (1, 2):
-            lane.pending[str(row)] = Pending(row, committed=True, text="C I 六十三")
+            lane.pending[str(row)] = Pending(row, committed=True, text="D E M O 六十三")
             await self.bridge.finish(lane, str(row))
         await processing.wait()
         with patch("recognition_compare.PROCESS_DRAIN_SECONDS", .01):
@@ -478,7 +478,7 @@ class ComparisonTests(unittest.IsolatedAsyncioTestCase):
                                 for event in self.browser.events))
         result = next(event for event in self.browser.events if event["type"] == "compare.processed"
                       and event.get("status") == "done")
-        self.assertEqual(result["text"], "CI63")
+        self.assertEqual(result["text"], "DEMO63")
         self.assertFalse(any(url.endswith("/responses") for url, _ in self.http.requests))
 
     async def test_native_auxiliary_refusal_is_not_accepted_as_a_success(self):
@@ -553,7 +553,7 @@ class ComparisonTests(unittest.IsolatedAsyncioTestCase):
         await until(lambda: self.bridge.lanes["realtime"].status == "ready" and self.bridge.lanes["speech"].status == "ready")
         native = next(event["session"] for event in self.realtime.sent if event["type"] == "session.update")
         self.assertIn("TEST_realtime", native["instructions"])
-        await self.bridge.process_text("C I 六十三", 1)
+        await self.bridge.process_text("D E M O 六十三", 1)
         body = next(event["response"] for event in self.voice[0].sent if event["type"] == "response.create")
         self.assertIn("TEST_speech", body["instructions"])
         receipt = next(event for event in self.browser.events if event["type"] == "compare.instructions")
@@ -575,7 +575,7 @@ class DisplayFormattingTests(unittest.TestCase):
     def test_number_and_code_display_does_not_invent_or_repair_letters(self):
         for raw, expected in (
             ("XQV R九P", "XQVR9P"), ("A, B, C, E, 二, 三, 四, 五, 六, 七", "ABCE234567"),
-            ("CI 六十三", "CI63"), ("CI sixty three", "CI63"), ("十二", "12"), ("二十", "20"),
+            ("DEMO 六十三", "DEMO63"), ("DEMO sixty three", "DEMO63"), ("十二", "12"), ("二十", "20"),
             ("零零一二三", "00123"), ("x q v r nine p", "XQVR9P"), ("你好，今天下午三點", "你好，今天下午3點"),
         ):
             with self.subTest(raw=raw):
@@ -585,7 +585,7 @@ class DisplayFormattingTests(unittest.TestCase):
         rows = native_rows([
             {"delta": "三", "start_ms": 2200, "end_ms": 2400},
             {"delta": "XQVR九P", "start_ms": 0, "end_ms": 200},
-            {"delta": "CI 六十", "start_ms": 2000, "end_ms": 2200},
+            {"delta": "DEMO 六十", "start_ms": 2000, "end_ms": 2200},
         ])
-        self.assertEqual([row["text"] for row in rows], ["XQVR9P", "CI63"])
-        self.assertEqual(rows[1]["raw"], "CI 六十三")
+        self.assertEqual([row["text"] for row in rows], ["XQVR9P", "DEMO63"])
+        self.assertEqual(rows[1]["raw"], "DEMO 六十三")

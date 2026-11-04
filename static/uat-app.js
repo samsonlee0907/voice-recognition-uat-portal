@@ -43,7 +43,7 @@
       "只有 status 和 value 兩個欄位。status 為 valid、unclear 或 incomplete；" +
       "只有 valid 才有非空 value，否則 value 為空字串。不要 Markdown、解釋或問題。" +
       "聽到非題目相關人聲時為 unclear；完全沒有輸入時不要自行產生答案。";
-    const realtime = "# UAT native recognition / 2026-11-04.1\n" +
+    const realtime = "# UAT native recognition / 2026-11-04.2\n" +
       "你直接聽取本次音訊，回答目前這一題的收答辨識任務，不是對話客服，也不是航空代碼擷取。\n" +
       "問題：" + group.question + "\n欄位規格與合法候選：" + group.rules +
       "\n主要語言是臺灣華語，中文聽辨文字使用繁體中文；明確的英文仍保留英文。" +

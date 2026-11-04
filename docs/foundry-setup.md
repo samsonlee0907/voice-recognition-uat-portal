@@ -65,19 +65,23 @@ Do not copy the original owner's resource names, subscription IDs or secrets.
 Locally this is the signed-in developer's Azure CLI principal; hosted it is the
 app's managed identity, **not** the person who deployed the app.
 
-Voice Live's current keyless guidance calls for **Cognitive Services User** and
-**Foundry User** at the resource scope. Foundry User was previously named Azure AI
-User; the role ID remains unchanged. GPT-Live also needs OpenAI inference
-permissions; **Cognitive Services OpenAI User** is the dedicated built-in role.
-An administrator should select the least-privilege combination appropriate to
-their tenant's effective permissions.
+For this direct-endpoint runtime, start with **Cognitive Services Speech User** for
+Voice Live and **Cognitive Services OpenAI User** for GPT-Live at the resource scope.
+The Speech User role includes the `SpeechServices/voicelive/realtime/*` data action.
+This is the narrower combination used for the isolated test app; it does not grant
+the app resource-management or role-assignment privileges.
+
+The general Voice Live quick start documents **Cognitive Services User** and
+**Foundry User** for broader Foundry access. This sample does not create projects
+or invoke Foundry Agents. Have an administrator review the current role definitions,
+tenant policy and actual endpoint errors rather than granting broader roles by
+default.
 
 The following documented built-in IDs avoid confusion during role renaming:
 
 | Role | Stable role ID |
 |---|---|
-| Cognitive Services User | `a97b65f3-24c7-4388-baec-2e87135dc908` |
-| Foundry User (formerly Azure AI User) | `53ca6127-db72-4b80-b1b0-d745d6d5456d` |
+| Cognitive Services Speech User | `f2dc8367-1007-4938-bd23-fe263f013447` |
 | Cognitive Services OpenAI User | `5e0bd9bd-7b93-4f28-af87-19fc36ad61bd` |
 
 Assign at **each relevant resource scope**, including both if the endpoints belong
@@ -119,6 +123,7 @@ Reviewed November 4, 2026:
 - [GPT-Live prerequisites, model deployment and sideband connection][live]
 - [GPT-Live strict session configuration and timed fragments][liveref]
 - [DefaultAzureCredential for Python][identity]
+- [Built-in Speech/OpenAI role data actions][roles]
 
 [voice]: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/voice-live#supported-models-and-regions
 [howto]: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/voice-live-how-to#authentication
@@ -127,3 +132,4 @@ Reviewed November 4, 2026:
 [live]: https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/gpt-live
 [liveref]: https://learn.microsoft.com/en-us/azure/foundry/openai/gpt-live-reference
 [identity]: https://learn.microsoft.com/en-us/python/api/azure-identity/azure.identity.aio.defaultazurecredential
+[roles]: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/ai-machine-learning

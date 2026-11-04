@@ -1,5 +1,5 @@
 {
-  "version": "standalone-2026-11-04.1",
+  "version": "standalone-2026-11-04.2",
   "groups": {
     "phone_confirm": {
       "label": "門號確認",
@@ -44,7 +44,7 @@
     "renewal": {
       "label": "續約通路",
       "question": "您最後是透過什麼通路完成續約？",
-      "rules": "value 為 store、online 或 phone。門市／櫃台為 store，官網／app／心生活為 online，電話客服／電銷為 phone。以最後實際完成的通路為準，不能只抓第一個關鍵字。"
+      "rules": "value 為 store、online 或 phone。門市／櫃台為 store，官網／服務 app為 online，電話客服／電銷為 phone。以最後實際完成的通路為準，不能只抓第一個關鍵字。"
     },
     "payment": {
       "label": "繳費方式",
@@ -572,8 +572,8 @@
     {
       "id": "REN-02",
       "group": "renewal",
-      "title": "心生活 app",
-      "utterance": "我在心生活 app 裡面辦的。",
+      "title": "電信服務 app",
+      "utterance": "我在電信服務 app 裡面辦的。",
       "expected": {
         "status": "valid",
         "value": "online"
@@ -621,7 +621,7 @@
       "id": "PAY-03",
       "group": "payment",
       "title": "超商",
-      "utterance": "我去全家便利商店繳費。",
+      "utterance": "我去附近的便利商店繳費。",
       "expected": {
         "status": "valid",
         "value": "convenience_store"

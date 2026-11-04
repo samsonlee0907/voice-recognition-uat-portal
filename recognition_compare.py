@@ -51,7 +51,7 @@ CODE_FORMAT_RULES = (
     "沒有代碼、關鍵字元不清楚或多個候選無法唯一決定時，整理結果回空字串；"
     "不要把不確定的中文或問句抄到整理結果。\n"
     "\n# 轉換範例（不是預設答案，只能依本次輸入擷取）\n"
-    "A B 三 零 => AB30\n"
+    "D E M O 三 零 => DEMO30\n"
     "我的訂位代號是 x q v r nine p，謝謝。 => XQVR9P\n"
     "三個零一個八七個五 => 00085555555\n"
     "3個01個87個5 => 00085555555\n"
@@ -59,8 +59,8 @@ CODE_FORMAT_RULES = (
     "兩個零，四個八，再來三 => 0088883\n"
     "two zeros four eights three => 0088883\n"
     "double zero, triple five, eight => 005558\n"
-    "C I 六十三 => CI63\n"
-    "我的代碼是 ＡＢＣ－００７。 => ABC007\n"
+    "D E M O 六十三 => DEMO63\n"
+    "我的代碼是 ＣＯＤＥ－００７。 => CODE007\n"
     "你好，今天心情很好 => 空字串（實際不輸出這些說明字）"
 )
 NATIVE_INSTRUCTIONS = (

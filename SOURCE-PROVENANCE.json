@@ -1,11 +1,14 @@
 {
-  "source_repository": "samsonlee0907/voice-live-enabled-call-center",
+  "source_repository": "Internal voice portal prototype (identifier omitted for sharing)",
   "extraction_date": "2026-11-04",
-  "prompt_revision": "2026-11-04.1",
+  "prompt_revision": "2026-11-04.2",
   "excluded": [
     "customer-derived logs and report",
     "credentials",
-    "airline workflows and databases"
+    "airline workflows and databases",
+    "company-branded examples",
+    "carrier-specific examples",
+    "owner-specific repository identifier"
   ],
   "source_sha256": {
     "recognition_compare.py": "117097c4d0808b21ce71d4d0f67e49f3af9138787fd3f6e58f4522d0e3e6dd67",

@@ -1,9 +1,18 @@
 # Taiwanese-Mandarin recognition and telecom UAT portal
 
-A standalone developer test portal extracted from `samsonlee0907/voice-live-enabled-call-center`.
+A standalone developer test portal extracted from an internal voice-portal prototype.
 It contains **only recognition comparison and telecom UAT**: no airline service,
 conversation studio, business tools, customer database, or customer-derived logs.
-See `SOURCE-PROVENANCE.json` for source hashes and exclusions.
+See `SOURCE-PROVENANCE.json` for source hashes and exclusions. Application examples
+use generic codes and unbranded service/payment channels. Owner-specific source
+repository references are omitted; required Microsoft/Azure/OpenAI product names
+remain so the setup instructions are accurate.
+
+This neutralization applies to the current source and generated pages. Earlier
+Git commits retain their original examples; history has not been rewritten.
+GitHub account ownership and commit-author metadata are separate from application
+content. User-entered notes and exported results are not automatically
+anonymized: use synthetic test inputs only.
 
 ## What you can test
 
@@ -129,7 +138,8 @@ not merely changing a dropdown label.
 
 ## Prompts and test-bank maintenance
 
-UAT native Realtime prompt revision **`2026-11-04.1`** clarifies:
+UAT native Realtime prompt revision **`2026-11-04.2`** retains the recognition guidance
+and uses neutral question-bank wording:
 
 - Taiwanese-Mandarin short-answer context, with Traditional-Chinese text.
 - All legal candidates from the selected question's rules, not a preferred answer.

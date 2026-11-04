@@ -21,7 +21,7 @@ $app = '<your-container-app-name>'
 $voiceEndpoint = 'https://<your-foundry-resource>.services.ai.azure.com'
 $liveEndpoint = 'https://<your-gpt-live-resource>.openai.azure.com'
 $liveDeployment = 'gpt-live-1'
-$version = 'recognition-uat-20261104-r1'
+$version = 'recognition-uat-20261104-r2'
 
 az group create --subscription $subscription --name $group --location eastus2
 az acr create --subscription $subscription --resource-group $group --name $registry --sku Basic
@@ -70,6 +70,12 @@ app, a managed environment and an HTTPS-only Container App. Login values become
 Container App secrets with secret-reference environment variables. There are no
 Azure API keys in the browser or image. It sets 0-1 replicas because the demo's
 admission limits are process-local, not a distributed limiter.
+
+To reuse an approved Container Apps environment in the same resource group, add
+`--parameters existingEnvironmentName='<your-existing-environment-name>'` to the
+deployment command. This creates a separate app and identity without updating the
+existing environment or any existing app. Omit it to create a new environment.
+Use fresh login credentials for the separate app.
 
 ACR/identity role propagation can delay the initial image pull. Inspect revision
 health and retry once permissions have propagated rather than enabling registry

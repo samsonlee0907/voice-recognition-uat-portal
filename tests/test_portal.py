@@ -111,9 +111,9 @@ class PortalTests(unittest.TestCase):
         self.assertEqual(len(bank["cases"]), 56)
         self.assertTrue(all(not case["refs"] for case in bank["cases"]))
         self.assertNotIn('id="report-data"', markup)
-        self.assertNotRegex(markup, r"202610\d\d-\d\d\.log|samsonlee-eastus|azurecontainerapps\.io|sourceDigest")
+        self.assertNotRegex(markup, r"202610\d\d-\d\d\.log|azurecontainerapps\.io|sourceDigest")
         prompt = markup.split("  function prompts() {", 1)[1].split("  function applyPrompts()", 1)[0]
-        self.assertIn("2026-11-04.1", prompt)
+        self.assertIn("2026-11-04.2", prompt)
         for value in ("selected.expected", "selected.utterance", "selected.id"):
             self.assertNotIn(value, prompt)
         from tools.build_uat import build

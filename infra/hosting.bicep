@@ -2,11 +2,13 @@
 param location string = resourceGroup().location
 param appName string
 param registryName string
+@description('Optional existing Container Apps environment in this resource group. Leave empty to create a new environment.')
+param existingEnvironmentName string = ''
 param containerImage string
 param voiceLiveEndpoint string
 param gptLiveEndpoint string
 param gptLiveDeployment string = 'gpt-live-1'
-param appVersion string = 'recognition-uat-20261104-r1'
+param appVersion string = 'recognition-uat-20261104-r2'
 @secure()
 param portalUsername string
 @secure()
@@ -30,7 +32,7 @@ resource pull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
   }
 }
-resource environment 'Microsoft.App/managedEnvironments@2024-03-01' = {
+resource environment 'Microsoft.App/managedEnvironments@2024-03-01' = if (empty(existingEnvironmentName)) {
   name: '${appName}-environment'
   location: location
   properties: {}
@@ -44,7 +46,9 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
   }
   dependsOn: [pull]
   properties: {
-    managedEnvironmentId: environment.id
+    managedEnvironmentId: empty(existingEnvironmentName)
+      ? environment!.id
+      : resourceId('Microsoft.App/managedEnvironments', existingEnvironmentName)
     configuration: {
       activeRevisionsMode: 'Single'
       ingress: { external: true, targetPort: 8000, transport: 'auto', allowInsecure: false }

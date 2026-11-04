@@ -15,20 +15,20 @@
     <nav class="airline-nav" aria-label="Portal"><a href="/recognition" aria-current="page">語音辨識比較</a><a href="/recognition/uat">電信 UAT 題庫</a></nav>
   </header>
   <main id="comparison">
-    <section class="lab-hero" aria-labelledby="lab-title"><div><p class="eyebrow">LISTEN. COMPARE. DISCOVER.</p><h2 id="lab-title">你的聲音，就是測試資料。</h2><p>用臺灣華語、英文字母或混合數字自然說話。這裡沒有航空任務，只有三個服務的辨識結果。</p></div><div class="lab-clock"><span>SESSION LIMIT</span><strong id="compare-clock">03:00</strong><span>同一支麥克風 · 不播放回覆</span></div></section>
+    <section class="lab-hero" aria-labelledby="lab-title"><div><p class="eyebrow">LISTEN. COMPARE. DISCOVER.</p><h2 id="lab-title">你的聲音，就是測試資料。</h2><p>用臺灣華語、英文字母或混合數字自然說話。這裡沒有業務任務，只有三個服務的辨識結果。</p></div><div class="lab-clock"><span>SESSION LIMIT</span><strong id="compare-clock">03:00</strong><span>同一支麥克風 · 不播放回覆</span></div></section>
     <section class="notice" aria-labelledby="capture-title">
       <h2 id="capture-title">只看辨識，不進行客服流程</h2>
-      <p>Azure Speech 保留原始轉錄，再由 GPT-6 Luna 整理。GPT-Realtime-2.1 與 GPT-Live-1 直接聽取語音，使用各自模型整理，不經其他 ASR 或 Luna 替代。Realtime 上方是模型產生的聽辨文字，不是獨立 ASR 證據。每欄可調整整理指令，錄音開始後固定。不進行航空查詢、不加詞彙提示、不播放生成聲音。</p>
+      <p>Azure Speech 保留原始轉錄，再由 GPT-6 Luna 整理。GPT-Realtime-2.1 與 GPT-Live-1 直接聽取語音，使用各自模型整理，不經其他 ASR 或 Luna 替代。Realtime 上方是模型產生的聽辨文字，不是獨立 ASR 證據。每欄可調整整理指令，錄音開始後固定。不進行業務查詢、不加詞彙提示、不播放生成聲音。</p>
       <label class="consent"><input id="compare-consent" type="checkbox"> 我同意將虛構測試語音送至三個 Azure 服務，並將 Azure Speech 原始文字送至 GPT-6 Luna 後處理，了解會產生各服務與模型用量。請勿提供真實個資。</label>
       <div class="call-actions">
         <button id="compare-start" disabled>開始比較</button>
         <button id="compare-stop" class="secondary" disabled>結束錄音</button>
         <button id="compare-clear" class="ghost" disabled>清除文字</button>
       </div>
-      <div class="lab-examples" aria-label="建議的虛構測試說法"><span>試著說</span><code>X Q V R 九 P</code><code>A B C 一二三四五六七</code><code>C I 六十三</code><code>三個零一個八七個五 → 00085555555</code><span>每句後停頓約兩秒</span></div>
+      <div class="lab-examples" aria-label="建議的虛構測試說法"><span>試著說</span><code>X Q V R 九 P</code><code>A B C 一二三四五六七</code><code>D E M O 六十三</code><code>三個零一個八七個五 → 00085555555</code><span>每句後停頓約兩秒</span></div>
       <p class="muted">預設整理指令只擷取代碼：展開「三個零」「double zero」等明確重複次數，保留前導零，只輸出大寫英文字母與數字，不加說明或標點。原始辨識另行保留；不清楚的字不猜補。可在各欄修改指令比較效果。</p>
       <p class="muted">模型仍可能聽錯字元或算錯重複次數；整理結果不是已驗證的代碼，請對照原始聽辨內容。</p>
-      <p class="muted">測試電信肯否、生日、生肖與分類？開啟獨立的 <a href="/recognition/uat">電信 UAT 報告與同題三模型實測</a>；本頁的航空代碼預設不變。</p>
+      <p class="muted">測試電信肯否、生日、生肖與分類？開啟獨立的 <a href="/recognition/uat">電信 UAT 報告與同題三模型實測</a>；本頁的一般代碼預設不變。</p>
       <p id="compare-status" role="status">正在載入服務設定。</p>
       <p id="compare-error" class="comparison-error" role="alert"></p>
       <p class="muted">最長錄音三分鐘。應用程式不保存音訊或逐字稿；結束錄音後文字仍保留供比對，清除、重新開始或離開頁面即移除。</p>
