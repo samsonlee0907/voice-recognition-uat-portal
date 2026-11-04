@@ -16,6 +16,12 @@ anonymized: use synthetic test inputs only.
 
 ## Start here
 
+**Understand the audio options first:** read the
+[Audio methods and tuning guide](docs/audio-methods-and-tuning.md) for a
+plain-language comparison of all three paths, current defaults, available
+controls, VAD trade-offs and Taiwanese-Mandarin UAT recommendations. It clearly
+separates what a tester can change in the portal from developer-only experiments.
+
 | Your goal | Follow this path | Where the portal password comes from |
 |---|---|---|
 | Test an existing hosted portal | Get its HTTPS URL and shared login from its maintainer; no clone or Azure CLI is needed just to use the browser UI. | The maintainer supplies it through an approved private channel. |
@@ -412,6 +418,8 @@ VAD remains unchanged: the Speech route uses multilingual Azure semantic VAD;
 Realtime uses server VAD (`0.5` threshold, 300 ms prefix); both use 1,600 ms ending
 silence and application-controlled responses. GPT-Live has its own native session
 API. The prompt textbox does not configure VAD.
+See the [audio tuning guide](docs/audio-methods-and-tuning.md#4-developer-tuning-what-the-parameters-mean)
+before changing detection, silence, noise-processing or native-session settings.
 
 ## Checks
 
