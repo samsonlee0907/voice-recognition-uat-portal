@@ -1,0 +1,17 @@
+:root { color-scheme: dark; font-family: Inter, "Microsoft JhengHei", system-ui, sans-serif; background: #081325; color: #edf4ff; }
+* { box-sizing: border-box; }
+body { align-items: center; display: flex; justify-content: center; margin: 0; min-height: 100vh; padding: 1.5rem; }
+.login-shell { width: min(100%, 28rem); }
+.login-card { background: linear-gradient(145deg, #102640, #0b1d31); border: 1px solid #375171; border-radius: 1rem; box-shadow: 0 24px 60px #0008; padding: clamp(1.5rem, 5vw, 2.5rem); }
+.eyebrow { color: #83bfff; font-size: .72rem; font-weight: 750; letter-spacing: .14em; margin: 0 0 .45rem; }
+h1 { font-size: clamp(1.65rem, 6vw, 2.35rem); margin: 0; }
+.intro { color: #d5eaff; margin: .65rem 0 1.5rem; }
+.notice { background: #243756; border-left: 4px solid #ffbd59; border-radius: .35rem; color: #dce9f7; font-size: .9rem; line-height: 1.6; margin: 0 0 1.25rem; padding: .8rem .9rem; }
+.error { color: #ffb7a4; font-weight: 700; min-height: 1.5rem; }
+.error:empty { display: none; }
+form { display: grid; gap: .55rem; }
+label { color: #c9dcf0; font-weight: 700; margin-top: .45rem; }
+input { background: #081323; border: 1px solid #405d80; border-radius: .45rem; color: #edf4ff; font: inherit; padding: .72rem; }
+input:focus { border-color: #83bfff; outline: 3px solid #1877f244; }
+button { background: #1877f2; border: 0; border-radius: .55rem; color: #fff; cursor: pointer; font: inherit; font-weight: 750; margin-top: .9rem; padding: .75rem 1rem; }
+button:hover { background: #3489f8; }

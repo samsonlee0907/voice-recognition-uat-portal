@@ -1,0 +1,729 @@
+{
+  "version": "standalone-2026-11-04.1",
+  "groups": {
+    "phone_confirm": {
+      "label": "門號確認",
+      "question": "剛剛念出的示範門號是否正確？",
+      "rules": "value 只能是 yes 或 no；對、沒錯為 yes，不對、不是為 no。這是門號正確性，不是本人確認；不確定為 unclear。"
+    },
+    "owner": {
+      "label": "門號／本人確認",
+      "question": "請確認您是否為門號登記者本人。",
+      "rules": "value 只能是 yes 或 no；不確定為 unclear。接受自然語助詞，否定優先，不能以含『是』就判肯定。"
+    },
+    "change": {
+      "label": "近期換卡",
+      "question": "請問您最近一個月有做過換卡、換號的異動嗎？",
+      "rules": "value 只能是 yes 或 no；有為 yes，沒有為 no，不確定為 unclear。不能從 Now、Mail 等不明詞猜答案。"
+    },
+    "birth": {
+      "label": "生日／紀年",
+      "question": "請提供您的出生年月日，並說明是西元還是民國。",
+      "rules": "明確西元或民國日期整理為 YYYY-MM-DD；民國年加 1911。保留前導零並驗證真實日曆。不明紀年為 unclear，缺碼為 incomplete，不能補字；無明確紀年的七碼數字不猜紀年。"
+    },
+    "last4": {
+      "label": "證件末四碼",
+      "question": "請提供您的身分證字號最後四碼。",
+      "rules": "value 為四個 ASCII 數字，保留前導零；中文逐碼數字轉數字。缺碼為 incomplete，多碼或多個未明確更正的候選為 unclear；不截斷或補字。"
+    },
+    "phone": {
+      "label": "虛構電話數字",
+      "question": "請提供本次示範用的十位數行動電話號碼。",
+      "rules": "value 為十個 ASCII 數字，保留零；缺碼為 incomplete，多碼為 unclear。只整理，不撥打、不查詢。"
+    },
+    "zodiac": {
+      "label": "生肖",
+      "question": "請問您的十二生肖是什麼？",
+      "rules": "value 只能是 鼠、牛、虎、兔、龍、蛇、馬、羊、猴、雞、狗、豬。接受老鼠、老虎、小狗等清楚同義詞。小龍可能指龍或蛇，須 unclear；No、Now、Show 等不明詞不可強制映射。"
+    },
+    "billing": {
+      "label": "帳單寄送",
+      "question": "您的帳單是以什麼方式寄送？",
+      "rules": "value 為 paper、email 或 sms。紙本／郵寄為 paper，明確電子郵件為 email，明確簡訊為 sms；只說信箱而無上下文為 unclear。"
+    },
+    "renewal": {
+      "label": "續約通路",
+      "question": "您最後是透過什麼通路完成續約？",
+      "rules": "value 為 store、online 或 phone。門市／櫃台為 store，官網／app／心生活為 online，電話客服／電銷為 phone。以最後實際完成的通路為準，不能只抓第一個關鍵字。"
+    },
+    "payment": {
+      "label": "繳費方式",
+      "question": "您最近一次是怎麼繳電話費的？",
+      "rules": "value 為 autopay、online_card、convenience_store、bank_transfer、store、post_office 或 cash_counter。自動扣繳為 autopay；線上信用卡為 online_card；超商為 convenience_store；ATM／網銀轉帳為 bank_transfer；電信門市為 store；郵局為 post_office；銀行或農會現金臨櫃為 cash_counter。app 不等同刷卡，方式不清楚須 unclear。"
+    }
+  },
+  "cases": [
+    {
+      "id": "TEL-01",
+      "group": "phone_confirm",
+      "title": "門號正確",
+      "utterance": "對，沒錯。",
+      "expected": {
+        "status": "valid",
+        "value": "yes"
+      },
+      "method": "只測肯否語意；本頁沒有實際念出客戶門號。",
+      "refs": []
+    },
+    {
+      "id": "TEL-02",
+      "group": "phone_confirm",
+      "title": "門號不對",
+      "utterance": "不是，那個號碼不對。",
+      "expected": {
+        "status": "valid",
+        "value": "no"
+      },
+      "method": "門號錯誤不代表非本人；分類問題必須分開。",
+      "refs": []
+    },
+    {
+      "id": "OWN-01",
+      "group": "owner",
+      "title": "直接肯定",
+      "utterance": "是。",
+      "expected": {
+        "status": "valid",
+        "value": "yes"
+      },
+      "method": "自然說完後停頓，觀察三欄。",
+      "refs": []
+    },
+    {
+      "id": "OWN-02",
+      "group": "owner",
+      "title": "我是啊",
+      "utterance": "我是啊。",
+      "expected": {
+        "status": "valid",
+        "value": "yes"
+      },
+      "method": "保留自然語氣，不刻意放慢。",
+      "refs": []
+    },
+    {
+      "id": "OWN-03",
+      "group": "owner",
+      "title": "嗯，是",
+      "utterance": "嗯，是。",
+      "expected": {
+        "status": "valid",
+        "value": "yes"
+      },
+      "method": "保留語助詞及短停頓。",
+      "refs": []
+    },
+    {
+      "id": "OWN-04",
+      "group": "owner",
+      "title": "臺灣口語否定",
+      "utterance": "欸，不是餒。",
+      "expected": {
+        "status": "valid",
+        "value": "no"
+      },
+      "method": "否定不得被當肯定；不代表技術失敗。",
+      "refs": []
+    },
+    {
+      "id": "OWN-05",
+      "group": "owner",
+      "title": "非本人政策結果",
+      "utterance": "不是。",
+      "expected": {
+        "status": "valid",
+        "value": "no"
+      },
+      "method": "只評收答，不把非本人分流當成 ASR 失敗。",
+      "refs": []
+    },
+    {
+      "id": "OWN-06",
+      "group": "owner",
+      "title": "不確定，不要強迫分類",
+      "utterance": "我不確定是不是我登記的。",
+      "expected": {
+        "status": "unclear",
+        "value": ""
+      },
+      "method": "新增負向邊界：確認沒有猜成 yes 或 no。",
+      "refs": []
+    },
+    {
+      "id": "SIM-01",
+      "group": "change",
+      "title": "近期有換卡",
+      "utterance": "有，上個星期換過。",
+      "expected": {
+        "status": "valid",
+        "value": "yes"
+      },
+      "method": "以語意判斷，不只接受單字。",
+      "refs": []
+    },
+    {
+      "id": "SIM-02",
+      "group": "change",
+      "title": "沒有，不要英文化",
+      "utterance": "沒有啊，最近都沒有。",
+      "expected": {
+        "status": "valid",
+        "value": "no"
+      },
+      "method": "對照曾出現 Mail／Now 的問題，不指定模型必須產生哪個原文。",
+      "refs": []
+    },
+    {
+      "id": "DOB-01",
+      "group": "birth",
+      "title": "完整西元日期（虛構）",
+      "utterance": "西元兩千年二月二十九日。",
+      "expected": {
+        "status": "valid",
+        "value": "2000-02-29"
+      },
+      "method": "有效閏日；這不是原始客戶生日。",
+      "refs": []
+    },
+    {
+      "id": "DOB-02",
+      "group": "birth",
+      "title": "民國換算（虛構）",
+      "utterance": "民國八十九年二月二十九日。",
+      "expected": {
+        "status": "valid",
+        "value": "2000-02-29"
+      },
+      "method": "明確說民國，不提供預期西元年給模型。",
+      "refs": []
+    },
+    {
+      "id": "DOB-03",
+      "group": "birth",
+      "title": "八碼逐碼（虛構）",
+      "utterance": "西元，二零零零零二二九。",
+      "expected": {
+        "status": "valid",
+        "value": "2000-02-29"
+      },
+      "method": "前導零不可遺失。",
+      "refs": []
+    },
+    {
+      "id": "DOB-04",
+      "group": "birth",
+      "title": "七碼民國含前導零（虛構）",
+      "utterance": "民國，零八九零二二九。",
+      "expected": {
+        "status": "valid",
+        "value": "2000-02-29"
+      },
+      "method": "先約定 YYYMMDD 並明確說民國。",
+      "refs": []
+    },
+    {
+      "id": "DOB-05",
+      "group": "birth",
+      "title": "年份後停頓",
+      "utterance": "西元兩千年……二月二十九日。",
+      "expected": {
+        "status": "valid",
+        "value": "2000-02-29"
+      },
+      "method": "省略號不念出；在年份後停約 1.3 秒。多段結果須人工合併判讀，不自動改寫模型輸出。",
+      "refs": []
+    },
+    {
+      "id": "DOB-06",
+      "group": "birth",
+      "title": "缺碼不補完",
+      "utterance": "西元，二零零零零二。",
+      "expected": {
+        "status": "incomplete",
+        "value": ""
+      },
+      "method": "不要說日期後半段，確認不補成生日。",
+      "refs": []
+    },
+    {
+      "id": "DOB-07",
+      "group": "birth",
+      "title": "未說紀年的兩位年份",
+      "utterance": "八十九年二月二十九日。",
+      "expected": {
+        "status": "unclear",
+        "value": ""
+      },
+      "method": "沒有明確紀年，不用答案反推民國。",
+      "refs": []
+    },
+    {
+      "id": "DOB-08",
+      "group": "birth",
+      "title": "不合法日期",
+      "utterance": "西元二零零一年二月二十九日。",
+      "expected": {
+        "status": "unclear",
+        "value": ""
+      },
+      "method": "新增負向邊界：2001 不是閏年；不能當合法日期。不是前期案例生日。",
+      "refs": []
+    },
+    {
+      "id": "DOB-09",
+      "group": "birth",
+      "title": "正常標點不得判錯",
+      "utterance": "西元兩千年，二月二十九日。",
+      "expected": {
+        "status": "valid",
+        "value": "2000-02-29"
+      },
+      "method": "逗號是語氣停頓，不口述逗號；ASR 顯示標點不預先指定。",
+      "refs": []
+    },
+    {
+      "id": "DOB-10",
+      "group": "birth",
+      "title": "超出月份範圍",
+      "utterance": "西元兩千年十三月一日。",
+      "expected": {
+        "status": "unclear",
+        "value": ""
+      },
+      "method": "新增負向邊界：不能把十三月自行修成其他月份。",
+      "refs": []
+    },
+    {
+      "id": "NUM-01",
+      "group": "last4",
+      "title": "前導雙零（虛構）",
+      "utterance": "零零四二。",
+      "expected": {
+        "status": "valid",
+        "value": "0042"
+      },
+      "method": "整串完全正確才算通過。",
+      "refs": []
+    },
+    {
+      "id": "NUM-02",
+      "group": "last4",
+      "title": "少一碼（虛構）",
+      "utterance": "零四二。",
+      "expected": {
+        "status": "incomplete",
+        "value": ""
+      },
+      "method": "不可補前導零成四碼。",
+      "refs": []
+    },
+    {
+      "id": "NUM-03",
+      "group": "last4",
+      "title": "多一碼（虛構）",
+      "utterance": "零零四二八。",
+      "expected": {
+        "status": "unclear",
+        "value": ""
+      },
+      "method": "不可截斷成合法四碼。",
+      "refs": []
+    },
+    {
+      "id": "NUM-04",
+      "group": "phone",
+      "title": "十碼電話（純虛構測試）",
+      "utterance": "零九零零，零零零，零四二。",
+      "expected": {
+        "status": "valid",
+        "value": "0900000042"
+      },
+      "method": "只測數字，不撥打或查詢。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-01",
+      "group": "zodiac",
+      "title": "完整老鼠",
+      "utterance": "我的生肖是老鼠。",
+      "expected": {
+        "status": "valid",
+        "value": "鼠"
+      },
+      "method": "完整短句；與單字版本配對測。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-02",
+      "group": "zodiac",
+      "title": "單字鼠",
+      "utterance": "鼠。",
+      "expected": {
+        "status": "valid",
+        "value": "鼠"
+      },
+      "method": "保留正常音量，不刻意誇張發音。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-03",
+      "group": "zodiac",
+      "title": "單字牛",
+      "utterance": "牛。",
+      "expected": {
+        "status": "valid",
+        "value": "牛"
+      },
+      "method": "與鼠平衡測試，不只提示鼠；前期案例的 No 不證明來電者當時說牛。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-04",
+      "group": "zodiac",
+      "title": "老虎",
+      "utterance": "老虎。",
+      "expected": {
+        "status": "valid",
+        "value": "虎"
+      },
+      "method": "平衡合法類別。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-05",
+      "group": "zodiac",
+      "title": "兔",
+      "utterance": "兔。",
+      "expected": {
+        "status": "valid",
+        "value": "兔"
+      },
+      "method": "平衡合法類別。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-06",
+      "group": "zodiac",
+      "title": "龍",
+      "utterance": "龍。",
+      "expected": {
+        "status": "valid",
+        "value": "龍"
+      },
+      "method": "平衡合法類別。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-07",
+      "group": "zodiac",
+      "title": "蛇",
+      "utterance": "蛇。",
+      "expected": {
+        "status": "valid",
+        "value": "蛇"
+      },
+      "method": "平衡合法類別。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-08",
+      "group": "zodiac",
+      "title": "馬",
+      "utterance": "馬。",
+      "expected": {
+        "status": "valid",
+        "value": "馬"
+      },
+      "method": "平衡合法類別。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-09",
+      "group": "zodiac",
+      "title": "羊",
+      "utterance": "羊。",
+      "expected": {
+        "status": "valid",
+        "value": "羊"
+      },
+      "method": "平衡合法類別。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-10",
+      "group": "zodiac",
+      "title": "猴",
+      "utterance": "猴。",
+      "expected": {
+        "status": "valid",
+        "value": "猴"
+      },
+      "method": "平衡合法類別。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-11",
+      "group": "zodiac",
+      "title": "雞",
+      "utterance": "雞。",
+      "expected": {
+        "status": "valid",
+        "value": "雞"
+      },
+      "method": "平衡合法類別。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-12",
+      "group": "zodiac",
+      "title": "小狗",
+      "utterance": "小狗。",
+      "expected": {
+        "status": "valid",
+        "value": "狗"
+      },
+      "method": "平衡合法類別。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-13",
+      "group": "zodiac",
+      "title": "豬",
+      "utterance": "豬。",
+      "expected": {
+        "status": "valid",
+        "value": "豬"
+      },
+      "method": "平衡合法類別。",
+      "refs": []
+    },
+    {
+      "id": "ZOD-14",
+      "group": "zodiac",
+      "title": "小龍歧義",
+      "utterance": "小龍。",
+      "expected": {
+        "status": "unclear",
+        "value": ""
+      },
+      "method": "使用者提供的語料同時對應龍與蛇，不能猜成資料庫值；不是前期案例聲學證據。",
+      "refs": []
+    },
+    {
+      "id": "BILL-01",
+      "group": "billing",
+      "title": "紙本郵寄",
+      "utterance": "都是郵寄紙本帳單。",
+      "expected": {
+        "status": "valid",
+        "value": "paper"
+      },
+      "method": "延伸題，前期案例未覆蓋此分類。",
+      "refs": []
+    },
+    {
+      "id": "BILL-02",
+      "group": "billing",
+      "title": "Email",
+      "utterance": "電子帳單，寄到我的 email。",
+      "expected": {
+        "status": "valid",
+        "value": "email"
+      },
+      "method": "中英混合；不說真實信箱。",
+      "refs": []
+    },
+    {
+      "id": "BILL-03",
+      "group": "billing",
+      "title": "簡訊",
+      "utterance": "用簡訊傳給我。",
+      "expected": {
+        "status": "valid",
+        "value": "sms"
+      },
+      "method": "延伸題，不假裝有前期案例 統計。",
+      "refs": []
+    },
+    {
+      "id": "BILL-04",
+      "group": "billing",
+      "title": "只有信箱",
+      "utterance": "寄到信箱。",
+      "expected": {
+        "status": "unclear",
+        "value": ""
+      },
+      "method": "實體或電子信箱未明，不強迫分類。",
+      "refs": []
+    },
+    {
+      "id": "REN-01",
+      "group": "renewal",
+      "title": "最後到門市",
+      "utterance": "先打電話問過，但最後是在門市續約。",
+      "expected": {
+        "status": "valid",
+        "value": "store"
+      },
+      "method": "不可只抓第一個通路。",
+      "refs": []
+    },
+    {
+      "id": "REN-02",
+      "group": "renewal",
+      "title": "心生活 app",
+      "utterance": "我在心生活 app 裡面辦的。",
+      "expected": {
+        "status": "valid",
+        "value": "online"
+      },
+      "method": "延伸題。",
+      "refs": []
+    },
+    {
+      "id": "REN-03",
+      "group": "renewal",
+      "title": "電銷",
+      "utterance": "電話客服幫我續約的。",
+      "expected": {
+        "status": "valid",
+        "value": "phone"
+      },
+      "method": "延伸題。",
+      "refs": []
+    },
+    {
+      "id": "PAY-01",
+      "group": "payment",
+      "title": "自動扣繳",
+      "utterance": "每個月自動扣款。",
+      "expected": {
+        "status": "valid",
+        "value": "autopay"
+      },
+      "method": "延伸題。",
+      "refs": []
+    },
+    {
+      "id": "PAY-02",
+      "group": "payment",
+      "title": "App 刷卡",
+      "utterance": "用 app 刷信用卡繳的。",
+      "expected": {
+        "status": "valid",
+        "value": "online_card"
+      },
+      "method": "明確刷卡才判 online_card。",
+      "refs": []
+    },
+    {
+      "id": "PAY-03",
+      "group": "payment",
+      "title": "超商",
+      "utterance": "我去全家便利商店繳費。",
+      "expected": {
+        "status": "valid",
+        "value": "convenience_store"
+      },
+      "method": "延伸題：依明確超商通路分類。",
+      "refs": []
+    },
+    {
+      "id": "PAY-04",
+      "group": "payment",
+      "title": "網銀轉帳",
+      "utterance": "我用網銀轉帳。",
+      "expected": {
+        "status": "valid",
+        "value": "bank_transfer"
+      },
+      "method": "不要與線上信用卡混淆。",
+      "refs": []
+    },
+    {
+      "id": "PAY-05",
+      "group": "payment",
+      "title": "現金臨櫃",
+      "utterance": "去農會櫃台付現金。",
+      "expected": {
+        "status": "valid",
+        "value": "cash_counter"
+      },
+      "method": "非電信門市。",
+      "refs": []
+    },
+    {
+      "id": "PAY-06",
+      "group": "payment",
+      "title": "只說 app",
+      "utterance": "我用 app 繳的。",
+      "expected": {
+        "status": "unclear",
+        "value": ""
+      },
+      "method": "未明刷卡或轉帳，不強迫分類。",
+      "refs": []
+    },
+    {
+      "id": "PAY-07",
+      "group": "payment",
+      "title": "電信門市",
+      "utterance": "在電信公司的門市繳的。",
+      "expected": {
+        "status": "valid",
+        "value": "store"
+      },
+      "method": "與銀行現金臨櫃、超商通路分開。",
+      "refs": []
+    },
+    {
+      "id": "PAY-08",
+      "group": "payment",
+      "title": "郵局劃撥",
+      "utterance": "去郵局劃撥繳費。",
+      "expected": {
+        "status": "valid",
+        "value": "post_office"
+      },
+      "method": "涵蓋第七種繳費類別。",
+      "refs": []
+    },
+    {
+      "id": "FLOW-01",
+      "group": "owner",
+      "title": "沉默／沒有輸入",
+      "utterance": "（保持安靜，不念出這段）",
+      "expected": {
+        "status": "no_input",
+        "value": ""
+      },
+      "method": "聆聽就緒後保持安靜約八秒，再結束；正常無結果不是模型服務失敗。人工檢查不得自行生成肯定。",
+      "refs": []
+    },
+    {
+      "id": "FLOW-02",
+      "group": "last4",
+      "title": "非題目相關人聲",
+      "utterance": "午餐想吃什麼，我們等一下再討論。",
+      "expected": {
+        "status": "unclear",
+        "value": ""
+      },
+      "method": "使用虛構無關內容；不播放來源日誌中的第三方談話。",
+      "refs": []
+    },
+    {
+      "id": "FLOW-03",
+      "group": "birth",
+      "title": "結束附近補段",
+      "utterance": "西元兩千年……二月二十九日。",
+      "expected": {
+        "status": "valid",
+        "value": "2000-02-29"
+      },
+      "method": "測試者在後段說完後才按結束；檢查最後結果是否可見。本頁沒有 TTS／人工轉接，不宣稱重現真正 barge-in 或電話轉接。",
+      "refs": []
+    }
+  ]
+}

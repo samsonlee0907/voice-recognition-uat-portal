@@ -1,0 +1,16 @@
+.git
+.github
+.venv
+.local
+.env
+.env.*
+tests
+**/__pycache__
+**/*.pyc
+**/*.wav
+**/*.pcm
+**/*.log
+infra
+docs
+test-results
+playwright-report

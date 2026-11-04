@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login | Recognition and telecom UAT</title>
+  <link rel="stylesheet" href="/static/login.css">
+</head>
+<body>
+  <main class="login-shell">
+    <section class="login-card" aria-labelledby="login-title">
+      <p class="eyebrow">AZURE VOICE LIVE / DEMO ENVIRONMENT</p>
+      <h1 id="login-title">Recognition and telecom UAT</h1>
+      <p class="intro">Please log in to access the protected recognition portal.</p>
+      <p class="notice">Every recognition page requires login; this shared developer login is a demo gate and is not production authentication. Do not enter any real customer data, ID numbers, passwords, or verification codes.</p>
+      <p class="error" role="alert">{{LOGIN_ERROR}}</p>
+      <form method="post" action="/login">
+        <input type="hidden" name="csrf_token" value="{{CSRF_TOKEN}}">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" autocomplete="username" required autofocus>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button type="submit">Log in to engineering validation entry point</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

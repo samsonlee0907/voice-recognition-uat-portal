@@ -1,0 +1,6 @@
+{
+  "revision": "2026-11-04.1",
+  "model": "gpt-6-luna",
+  "native_realtime_model": "gpt-realtime-2.1",
+  "api_version": "2026-07-15"
+}

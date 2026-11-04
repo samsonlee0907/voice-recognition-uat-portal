@@ -1,0 +1,18 @@
+{
+  "source_repository": "samsonlee0907/voice-live-enabled-call-center",
+  "extraction_date": "2026-11-04",
+  "prompt_revision": "2026-11-04.1",
+  "excluded": [
+    "customer-derived logs and report",
+    "credentials",
+    "airline workflows and databases"
+  ],
+  "source_sha256": {
+    "recognition_compare.py": "117097c4d0808b21ce71d4d0f67e49f3af9138787fd3f6e58f4522d0e3e6dd67",
+    "static/recognition.js": "abb95d455f68f4477805c4dd3f8fcb893242a2e04a8e3875c006dce4a2dbe926",
+    "static/airline-service-worklet.js": "32a20817bee2a692df6e54e286d953e04b61f8df997c518c40133cd6c6e78305",
+    "airline_live.py": "69e009299f6a1b9435b8dd9afc86844344831aa90302dfaf4e8e58098ef23568",
+    "airline_runtime.py": "856493d6029d1aa320d61082074188ac334b8cd8f9e45553bdd35eff4072d243",
+    "airline_voice_live.py": "0e728c0f159c8a156a64c0e4254c353187cd65f03b5922b7525e405e1e92cfb8"
+  }
+}

@@ -1,0 +1,14 @@
+.venv/
+.local/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+*.log
+*.wav
+*.pcm
+*.sqlite
+test-results/
+playwright-report/
+*.bicep.json

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>語音辨識比較 / Speech recognition comparison</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/recognition.css">
+</head>
+<body>
+  <a class="skip-link" href="#comparison">跳至辨識比較</a>
+  <header class="site-header">
+    <div><p class="eyebrow">VOICE LAB / SAME MICROPHONE</p><h1>語音辨識比較</h1>
+      <p class="subtitle">一次開口，三種視角。看見字母、數字與語言的細微差異。</p></div>
+    <nav class="airline-nav" aria-label="Portal"><a href="/recognition" aria-current="page">語音辨識比較</a><a href="/recognition/uat">電信 UAT 題庫</a></nav>
+  </header>
+  <main id="comparison">
+    <section class="lab-hero" aria-labelledby="lab-title"><div><p class="eyebrow">LISTEN. COMPARE. DISCOVER.</p><h2 id="lab-title">你的聲音，就是測試資料。</h2><p>用臺灣華語、英文字母或混合數字自然說話。這裡沒有航空任務，只有三個服務的辨識結果。</p></div><div class="lab-clock"><span>SESSION LIMIT</span><strong id="compare-clock">03:00</strong><span>同一支麥克風 · 不播放回覆</span></div></section>
+    <section class="notice" aria-labelledby="capture-title">
+      <h2 id="capture-title">只看辨識，不進行客服流程</h2>
+      <p>Azure Speech 保留原始轉錄，再由 GPT-6 Luna 整理。GPT-Realtime-2.1 與 GPT-Live-1 直接聽取語音，使用各自模型整理，不經其他 ASR 或 Luna 替代。Realtime 上方是模型產生的聽辨文字，不是獨立 ASR 證據。每欄可調整整理指令，錄音開始後固定。不進行航空查詢、不加詞彙提示、不播放生成聲音。</p>
+      <label class="consent"><input id="compare-consent" type="checkbox"> 我同意將虛構測試語音送至三個 Azure 服務，並將 Azure Speech 原始文字送至 GPT-6 Luna 後處理，了解會產生各服務與模型用量。請勿提供真實個資。</label>
+      <div class="call-actions">
+        <button id="compare-start" disabled>開始比較</button>
+        <button id="compare-stop" class="secondary" disabled>結束錄音</button>
+        <button id="compare-clear" class="ghost" disabled>清除文字</button>
+      </div>
+      <div class="lab-examples" aria-label="建議的虛構測試說法"><span>試著說</span><code>X Q V R 九 P</code><code>A B C 一二三四五六七</code><code>C I 六十三</code><code>三個零一個八七個五 → 00085555555</code><span>每句後停頓約兩秒</span></div>
+      <p class="muted">預設整理指令只擷取代碼：展開「三個零」「double zero」等明確重複次數，保留前導零，只輸出大寫英文字母與數字，不加說明或標點。原始辨識另行保留；不清楚的字不猜補。可在各欄修改指令比較效果。</p>
+      <p class="muted">模型仍可能聽錯字元或算錯重複次數；整理結果不是已驗證的代碼，請對照原始聽辨內容。</p>
+      <p class="muted">測試電信肯否、生日、生肖與分類？開啟獨立的 <a href="/recognition/uat">電信 UAT 報告與同題三模型實測</a>；本頁的航空代碼預設不變。</p>
+      <p id="compare-status" role="status">正在載入服務設定。</p>
+      <p id="compare-error" class="comparison-error" role="alert"></p>
+      <p class="muted">最長錄音三分鐘。應用程式不保存音訊或逐字稿；結束錄音後文字仍保留供比對，清除、重新開始或離開頁面即移除。</p>
+    </section>
+    <section class="comparison-grid" aria-label="三個服務的原始辨識文字">
+      <article class="recognition-lane" data-lane="speech">
+        <div class="lane-heading"><div><p class="eyebrow">01 / FINAL TRANSCRIPTION</p><h2>Azure Speech</h2></div><span class="lane-tag">zh-TW</span></div>
+        <p class="muted">臺灣華語，完整轉錄。未加入詞彙提示；同一個 Voice Live 工作階段的 Luna 只整理下方文字。</p>
+        <p id="speech-status" class="lane-status" role="status">尚未開始</p>
+        <details class="prompt-editor"><summary>調整 GPT-6 Luna 整理指令</summary><label for="speech-instructions">Azure Speech 轉錄的後處理指令</label><textarea id="speech-instructions" rows="6" maxlength="4000" disabled></textarea><button id="speech-instructions-reset" class="ghost" disabled>還原預設指令</button><p id="speech-instructions-status" class="muted">下次錄音時套用；僅保留在本頁。</p></details>
+        <h3 class="result-label">原始辨識</h3>
+        <ol id="speech-transcript" class="recognition-text" aria-label="Azure Speech 原始轉錄"></ol>
+        <section class="processed-section" aria-labelledby="speech-processed-title"><h3 id="speech-processed-title">模型後處理 <span>GPT-6 Luna</span></h3>
+          <p class="muted">預設只擷取字母數字代碼並展開重複數字；編號對應上方原文，不補回遺失語音。</p>
+          <ol id="speech-processed" class="recognition-text processed-text" aria-label="Azure Speech 的 Luna 後處理"></ol></section>
+        <p id="speech-notice" class="comparison-error" role="status"></p>
+      </article>
+      <article class="recognition-lane" data-lane="realtime">
+        <div class="lane-heading"><div><p class="eyebrow">02 / NATIVE AUDIO UNDERSTANDING</p><h2>GPT-Realtime-2.1</h2></div><span class="lane-tag">原生 · Voice Live</span></div>
+        <p class="muted">透過 Voice Live 託管的原生音訊模型，獨立 ASR 已關閉；同一份麥克風音訊直接聽辨，不先轉成 Speech 文字。</p>
+        <p id="realtime-status" class="lane-status" role="status">尚未開始</p>
+        <details class="prompt-editor"><summary>調整 GPT-Realtime-2.1 整理指令</summary><label for="realtime-instructions">原生聽辨與格式整理指令</label><textarea id="realtime-instructions" rows="6" maxlength="4000" disabled></textarea><button id="realtime-instructions-reset" class="ghost" disabled>還原預設指令</button><p id="realtime-instructions-status" class="muted">下次錄音時套用；輸出欄位與無工具限制不變。</p></details>
+        <h3 class="result-label">原生聽辨文字（模型產生）</h3>
+        <ol id="realtime-transcript" class="recognition-text" aria-label="GPT-Realtime 原生模型聽辨文字"></ol>
+        <section class="processed-section" aria-labelledby="realtime-processed-title"><h3 id="realtime-processed-title">模型整理 <span>GPT-Realtime-2.1</span></h3>
+          <p class="muted">預設由同一模型擷取代碼並展開重複數字，編號對應上方完整聽辨；不經 Luna 或規則代換。</p>
+          <ol id="realtime-processed" class="recognition-text processed-text" aria-label="GPT-Realtime 自身模型整理輸出"></ol></section>
+        <p id="realtime-notice" class="comparison-error" role="status"></p>
+      </article>
+      <article class="recognition-lane" data-lane="live">
+        <div class="lane-heading"><div><p class="eyebrow">03 / NATIVE VOICE FRAGMENTS</p><h2>GPT-Live-1</h2></div><span class="lane-tag">即時片段</span></div>
+        <p class="muted">原始輸入片段與模型整理輸出分開顯示，音軌不播放；未經 Luna 或規則整理替代。</p>
+        <p id="live-status" class="lane-status" role="status">尚未開始</p>
+        <details class="prompt-editor"><summary>調整 GPT-Live-1 整理指令</summary><label for="live-instructions">原生模型整理指令</label><textarea id="live-instructions" rows="6" maxlength="4000" disabled></textarea><button id="live-instructions-reset" class="ghost" disabled>還原預設指令</button><p id="live-instructions-status" class="muted">下次錄音時套用；原始片段不會被覆蓋。</p></details>
+        <h3 class="result-label">原始輸入片段</h3>
+        <ol id="live-transcript" class="recognition-text native-text" aria-label="GPT-Live 即時文字片段"></ol>
+        <section class="processed-section" aria-labelledby="live-processed-title"><h3 id="live-processed-title">模型後處理 <span>GPT-Live-1</span></h3>
+          <p class="muted">GPT-Live 依自身聽辨與預設指令只輸出代碼並展開重複數字；時間分段與原始輸入不一定逐列對應。</p>
+          <ol id="live-processed" class="recognition-text processed-text" aria-label="GPT-Live 自身模型整理輸出"></ol></section>
+        <p id="live-notice" class="comparison-error" role="status"></p>
+      </article>
+    </section>
+    <p class="muted comparison-footnote">顯示最近 60 段結果及 160 個原生片段。只有 Azure Speech 文字送至 Luna，每次錄音最多 60 次、24,000 字元，沿用同一個 Voice Live 工作階段計費；Realtime 最多 60 次原生聽辨，使用 Voice Live Pro 託管路徑計費。這兩欄不使用獨立 OpenAI 部署／Responses 端點。失敗或取消明確標示；停止時最多額外等待 Luna 十秒。原生模型即使不播放音軌，仍有生成用量。指令只影響本欄模型整理，不會更改輸入音訊或 Azure Speech 原始轉錄。這是體驗比較，不是準確率排名。</p>
+  </main>
+  <script src="/static/recognition.js" defer></script>
+</body>
+</html>

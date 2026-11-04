@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>電信 UAT / Three-model recognition</title>
+<style>
+:root{--teal:#077e79;--pale:#eaf6f3;--line:#d6e2df;--red:#a12c27}
+*{box-sizing:border-box}body{margin:0;background:#f1f5f4;color:#172e35;font:16px/1.6 system-ui,sans-serif}
+header,main{max-width:1500px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+h1{font-size:30px;margin:0}h2{font-size:25px}h3{font-size:20px}.sub,.hint{color:#4a6369}.hint{font-size:13px}
+.kicker{color:var(--teal);font-size:12px;letter-spacing:2px}.card{padding:22px;border:1px solid var(--line);border-radius:16px;background:white;min-width:0}
+.callout{background:var(--pale);border-left:4px solid var(--teal);padding:16px;margin:18px 0}.section-head{display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}.btn,button{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:white;color:#193e42;font:inherit;cursor:pointer;text-decoration:none}
+.primary{background:var(--teal);color:white}.small{font-size:12px}button:disabled{opacity:.5;cursor:not-allowed}
+label{display:block}.field-label{font-weight:650}select,textarea{max-width:100%;padding:10px;border:1px solid #91aaa8;border-radius:8px;background:white;color:#172e35;font:inherit}
+textarea{width:100%;min-height:110px;resize:vertical}pre{white-space:pre-wrap;overflow-wrap:anywhere}.error{color:var(--red)}
+a{color:#075b71}a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #db8900;outline-offset:3px}
+@media(max-width:600px){header,main{padding:16px}.card{padding:16px}h1{font-size:24px}}
+@media print{.no-print,header nav{display:none!important}body{background:white}header,main{padding:10px}}
+</style>
+</head>
+<body data-uat-workbench>
+<header><div><div class="kicker">SYNTHETIC TESTS / NATIVE AUDIO</div><h1>電信收答三模型 UAT</h1></div>
+<nav aria-label="Portal"><a href="/recognition">語音辨識比較</a> · <a id="hosted-link" href="/recognition/uat">受保護線上題庫</a> · <button id="export-html" class="btn">下載離線 HTML</button></nav></header>
+<main>
+<div class="callout"><strong>開發者獨立版：</strong>只含 56 個新編合成案例、可調指令及人工評分，不附客戶日誌或錄音。
+原生聽辨不是獨立 ASR：Realtime 的 heard_text 與整理結果來自同一模型回覆；GPT-Live 的輸入片段不等於完整語意回合。
+下載版可離線選題、評分及匯出，真實麥克風比較必須登入 HTTPS 站台或已設定的 localhost。請勿填入真實個資。</div>
+__WORKBENCH__
+</main>
+<script id="uat-bank" type="application/json">__BANK__</script>
+<script id="uat-review-data" type="application/json">__REVIEW__</script>
+<script>
+__APP__
+</script>
+<script>
+(() => {
+  "use strict";
+  if (["http:", "https:"].includes(location.protocol)) {
+    document.getElementById("hosted-link").href = location.origin + "/recognition/uat";
+  }
+  document.getElementById("export-html").addEventListener("click", () => {
+    if (!["idle", "ended", undefined].includes(document.body.dataset.comparePhase)) {
+      document.getElementById("uat-record-status").textContent = "請先結束錄音，再下載離線 HTML。";
+      return;
+    }
+    const clone = document.documentElement.cloneNode(true);
+    window.dispatchEvent(new CustomEvent("report:export-clone", {detail:clone}));
+    clone.querySelectorAll('script[src]').forEach(element => element.remove());
+    clone.querySelector("#uat-records").replaceChildren();
+    clone.querySelectorAll("textarea").forEach(element => { element.value = ""; element.textContent = ""; });
+    const url = URL.createObjectURL(new Blob(["<!doctype html>\n" + clone.outerHTML], {type:"text/html;charset=utf-8"}));
+    const link = document.createElement("a");
+    link.href = url; link.download = "recognition-telecom-uat.html"; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  });
+})();
+</script>
+</body>
+</html>

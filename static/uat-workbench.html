@@ -1,0 +1,41 @@
+<section class="section" id="workbench">
+  <a id="uat-client-source" href="/static/recognition.js" hidden aria-hidden="true"></a>
+  <div class="section-head"><div><div class="kicker">LIVE LAB / SYNTHETIC QUESTIONS</div><h2>同一題、同一支麥克風，三條真實路徑</h2><p class="sub">Azure Speech → GPT-6 Luna、原生 GPT-Realtime-2.1、原生 GPT-Live-1。沿用既有比較頁的實際串流；不是模擬結果，也不會自動拿題庫答案評分。</p></div><a class="btn" href="/recognition/uat" target="_blank" rel="noopener noreferrer">開啟受保護實測站台</a></div>
+  <div class="callout"><strong>這能測什麼：</strong>逐題理解、日期／數字整理、否定與分類、部分結果及結束收音。瀏覽器麥克風不是 PCMU／8 kHz 電話線；本頁不播放提示語、不做身分核驗／DTMF／轉接，不能宣稱已覆蓋 TTS 回音、真正搶話或電話逾時策略。此獨立版本只含新編合成題，不附原始或遮罩後的客戶日誌。</div>
+  <div class="uat-layout">
+    <article class="card">
+      <label class="field-label" for="uat-case">1 / 選擇合成測試題</label>
+      <select id="uat-case" class="uat-wide"></select>
+      <p class="hint" id="uat-bank-count"></p>
+      <h3 id="uat-question"></h3>
+      <label class="field-label" for="uat-utterance">測試者可說的句子（不送入指令）</label><p class="uat-utterance" id="uat-utterance"></p>
+      <p class="hint" id="uat-method"></p>
+      <details><summary>人工評分參考（只在測試端）</summary><pre id="uat-expected"></pre><p class="hint">請依實際說出的內容人工判斷；參考答案不是客戶資料庫、不是模型輸出。若改說其他內容，請在測試備註註明，不能照題庫硬判。</p></details>
+      <div id="uat-refs" class="line-links"></div>
+    </article>
+    <article class="card no-print">
+      <h3>2 / 啟用、同意，再錄音</h3><p id="uat-mode" role="status"></p>
+      <button class="btn primary" id="uat-enable">啟用既有三模型功能</button>
+      <p class="hint">啟用會讀取同源服務設定；按下開始才要求麥克風並建立模型連線。每次錄音只測一題；錄音期間題目與指令鎖定。請只說虛構資料，連線可能產生費用。</p>
+      <label><input id="compare-consent" type="checkbox" disabled> 我同意把本次虛構測試語音傳送給三個已設定服務。</label>
+      <div class="actions"><button id="compare-start" class="btn primary" disabled>開始同題比較</button><button id="compare-stop" class="btn" disabled>結束／等待末段</button><button id="compare-clear" class="btn" disabled>清除即時文字</button><span id="compare-clock" aria-label="剩餘錄音時間"></span></div>
+      <p id="compare-status" role="status">尚未啟用。離線仍可使用題庫與人工評分紀錄。</p><p id="compare-error" class="status-message error" role="alert"></p>
+    </article>
+  </div>
+  <div class="uat-lanes no-print" id="uat-lanes"></div>
+  <article class="card no-print" style="margin-top:16px">
+    <h3>3 / 結束後人工判讀、明確保存</h3><p class="hint">「開始聆聽→首個整理結果」包含測試者停頓，並非說話結束至 ASR final，不能作跨模型延遲排名。GPT-Live 的片段也不是已確認語意回合。</p>
+    <div id="uat-grades" class="uat-lanes"></div>
+    <label class="field-label" for="uat-run-note">本次測試備註（不自動遮罩）</label><textarea id="uat-run-note" maxlength="2000" placeholder="例如：安靜房間、同一支耳機；句子與建議不同；年份後停頓。請勿填入真實個資。"></textarea>
+    <label><input type="checkbox" id="uat-include-text"> 明確將本次辨識／整理文字一併存入報告（僅限虛構語音；預設不保存）</label>
+    <div class="actions"><button class="btn primary" id="uat-save-run" disabled>保存本次人工評分</button><button class="btn" id="uat-add-manual">新增離線人工測試紀錄</button><button class="btn" id="uat-export-runs">匯出測試紀錄 JSON</button><button class="btn" id="uat-import-runs">匯入測試紀錄</button><input id="uat-import-file" type="file" accept=".json,application/json" hidden aria-label="匯入測試紀錄 JSON"></div>
+    <p id="uat-record-status" class="status-message" role="status" aria-live="polite"></p>
+    <p class="hint">只有按「保存」才寫入紀錄；不保存音訊，沒有雲端同步。最多 100 次，滿額須自行刪除。測試 JSON 可獨立匯出；「下載離線 HTML」攜帶已保存的測試紀錄，未保存的即時文字不會被帶走。瀏覽器本機保存不會改寫來源 HTML。</p>
+  </article>
+  <div id="uat-record-summary" class="callout"></div><div id="uat-records"></div>
+</section>
+<style>
+.uat-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.uat-layout .card>*+*{margin-top:12px}.uat-wide{width:100%}.uat-utterance{border-left:3px solid var(--teal);padding:10px 15px;background:var(--pale);font-size:20px;white-space:pre-wrap}.uat-lanes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}.uat-lane{min-width:0}.uat-lane textarea{min-height:180px;font-size:12px}.uat-lane ol{padding:10px 10px 10px 30px;background:#f4f7f8;min-height:80px;max-height:300px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}.uat-lane h4{margin:12px 0 0}.uat-lane[data-status=failed]{border-color:var(--red)}#uat-expected{white-space:pre-wrap;overflow-wrap:anywhere}.uat-grade label{display:block;font-weight:650;font-size:13px}.uat-grade select{width:100%}.uat-record{margin-top:12px;padding:18px;border:1px solid var(--line);border-radius:12px;background:white;overflow-wrap:anywhere}.uat-record p{white-space:pre-wrap}.uat-record pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.6 ui-monospace,Consolas,monospace}.uat-record button{float:right}.uat-record h4{margin:0}.uat-record details{margin-top:8px}#uat-record-summary{white-space:pre-line}
+@media(max-width:1000px){.uat-lanes{grid-template-columns:1fr}.uat-layout{grid-template-columns:1fr}}
+@media print{.uat-layout{display:block}.uat-record{break-inside:avoid}.uat-record button{display:none!important}.uat-layout details{display:block}}
+</style>
