@@ -14,6 +14,19 @@ GitHub account ownership and commit-author metadata are separate from applicatio
 content. User-entered notes and exported results are not automatically
 anonymized: use synthetic test inputs only.
 
+## Start here
+
+| Your goal | Follow this path | Where the portal password comes from |
+|---|---|---|
+| Test an existing hosted portal | Get its HTTPS URL and shared login from its maintainer; no clone or Azure CLI is needed just to use the browser UI. | The maintainer supplies it through an approved private channel. |
+| Run your own local portal | [Get the source and tools](#get-the-source-and-tools), complete [Foundry prerequisites](#required-azure-resources), then [run locally](#quick-start-on-windows). | You choose it at the launcher's two password prompts. |
+| Deploy your own Azure portal | [Get the source and tools](#get-the-source-and-tools), complete [Foundry prerequisites](#required-azure-resources), then [deploy to Azure](#deploy-to-azure-container-apps). | You choose it with `tools\make_credentials.py` before deployment. |
+
+**There is no default passcode, OTP, registration flow or password-retrieval API.**
+The default example username is `developer`, but the password is always chosen by
+the person running or deploying the app. It is not your Azure password, an API key
+or the session-signing secret. See [signing in and passwords](#signing-in-and-passwords).
+
 ## What you can test
 
 - `/recognition`: one microphone, three real routes, editable per-route instructions,
@@ -60,40 +73,84 @@ Read [Foundry setup and permissions](docs/foundry-setup.md) before provisioning.
 Availability, access approval, quota and region support must be checked in the
 developer's own subscription; this repository cannot grant model access.
 
-## Quick start on Windows
+Before proceeding, record the Voice Live resource endpoint, the GPT-Live endpoint
+and deployment name, and the full Azure resource ID/subscription for each resource.
+An administrator must grant the runtime identity inference permissions. If you
+cannot create resources or assign roles, have the appropriate administrator
+complete those steps rather than expecting `az login` to grant access.
 
-Use Python **3.12**, Azure CLI, Git and a current Chrome/Edge browser. In PowerShell,
-from the repository root:
+## Get the source and tools
+
+Install [Python 3.12](https://www.python.org/downloads/),
+[Git](https://git-scm.com/downloads),
+[Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) and a
+current Chrome/Edge browser. Examples below use Windows PowerShell. Use this
+repository's **Code -> clone URL**; the owner must grant access if it is private.
+GitHub repository access and Azure access are separate.
+
+Replace every `<...>` placeholder, including the angle brackets. Run from a
+directory where you want the new checkout:
 
 ```powershell
+git clone '<repository-clone-url>' voice-recognition-uat-portal
+Set-Location voice-recognition-uat-portal
+python --version
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+
+$subscription = '<your-subscription-id>'
 az login
-az account set --subscription '<your-subscription-id>'
+az account set --subscription $subscription
+az account show --subscription $subscription --query '{subscription:id,identityType:user.type}' -o json
+```
+
+Confirm Python reports **3.12** and each command succeeds. For resources in another
+Entra tenant, use `az login --tenant '<resource-tenant-id>'`. Keep this PowerShell
+window open: later examples reuse `$subscription`. If you open a new window, set
+the variables again. You do not need to activate the virtual environment because
+the commands explicitly use its Python executable.
+
+On macOS/Linux, use `python3`, `.venv/bin/python`, and ordinary shell line
+continuation instead of the PowerShell examples. All Python paths are portable.
+
+## Quick start on Windows
+
+Complete the source/tool setup and Foundry prerequisites above. Your **CLI user's**
+inference permissions must be granted on the configured resource(s); permission
+given to an Azure-hosted app's managed identity does not authorize your user.
+The [Foundry guide](docs/foundry-setup.md#4-authorize-the-runtime-identity) includes
+the roles and assignment commands.
+
+From the repository root:
+
+```powershell
 .\.venv\Scripts\python.exe tools\run_local.py `
-  --subscription '<your-subscription-id>' `
+  --subscription $subscription `
   --voice-live-endpoint 'https://<your-foundry-resource>.services.ai.azure.com' `
   --gpt-live-endpoint 'https://<your-gpt-live-resource>.openai.azure.com' `
-  --gpt-live-deployment 'gpt-live-1' `
+  --gpt-live-deployment '<your-actual-gpt-live-deployment-name>' `
   --username developer
 ```
 
-Choose a new test-portal password when prompted. The launcher keeps its hash and
-fresh session secret in process memory, binds to **127.0.0.1 only**, and explicitly
-uses Azure CLI authentication for the requested subscription.
+At **New portal password (12-256 characters)**, choose your own new password,
+then enter the same value at **Confirm portal password**. Typing is hidden.
+Save it in an approved password manager; the launcher does not print it, save it
+to a file or generate an `access.json`. Keep the terminal/server running.
 
-Open **http://localhost:8000/recognition/uat**, not a LAN IP. Sign in, select a case,
-click **啟用既有三模型功能**, tick consent, click **開始同題比較**, allow the microphone,
-wait for listening readiness, speak and pause about two seconds. End the recording
-before changing cases or instructions. Grade what was actually spoken, not a
-different suggested utterance.
+Open **http://localhost:8000/recognition/uat**, not a LAN IP. Sign in with username
+**`developer`** and **the password you just typed**. Follow [your first microphone
+test](#your-first-microphone-test). `/recognition` is the general letter/number
+comparison page. If port 8000 is occupied, add `--port 8001` to the launch command
+and use that port in the URL. Stop the server with **Ctrl+C**; restart the same
+command to choose a new password if needed.
+
+The launcher keeps the password hash and a fresh session secret in process memory,
+binds to **127.0.0.1 only**, and explicitly uses Azure CLI authentication for the
+requested subscription.
 
 `localhost` is a browser secure-context exception. A shared/LAN/public URL needs
 **HTTPS** for the microphone and Secure session cookie. Do not expose the local
 launcher publicly or enable `ALLOW_INSECURE_LOCALHOST` in hosting.
-
-On macOS/Linux, use `python3`, `.venv/bin/python`, and ordinary shell line
-continuation instead of the PowerShell examples. All Python paths are portable.
 
 **Two different sign-ins:** `az login` authenticates your developer account to
 Azure. The username/password chosen by the launcher only protect the local portal;
@@ -107,18 +164,197 @@ Running locally provisions no Azure hosting resources, but inference still runs
 on the configured Azure services and incurs their normal usage charges. A working
 local test does not mean the models run offline.
 
-## Hosted deployment
+## Deploy to Azure Container Apps
 
-See [Azure Container Apps deployment](docs/azure-hosting.md). It documents resource
-creation, a private registry image, secure login parameters, identity/role assignment,
-and readiness checks. `infra/foundry.bicep` creates a **new dev resource only**;
-`infra/hosting.bicep` hosts the application against **existing** qualified endpoints.
-Neither template silently deploys models, requests quota, or modifies an existing
-resource's networking. Review infrastructure changes before running them.
+This is an alternative to running locally; **you do not need to start the local
+server first**. Complete the source/tool setup above. Your deployment operator
+needs permission to create hosting resources and assign ACR/AI roles. Contributor
+alone does not grant role-assignment permission. Review the templates and charges
+with your administrator before provisioning.
+
+The following is the complete default path for a **new** registry, environment,
+app and managed identity against **already qualified Foundry endpoints**. It does
+not deploy models or request access/quota. To create a new Foundry resource first,
+follow [Foundry setup](docs/foundry-setup.md); GPT-Live deployment/access is still
+a separate prerequisite. For existing hosting resources, cross-subscription AI
+roles, private-network requirements and password rotation, see the
+[detailed hosting guide](docs/azure-hosting.md).
+
+### 1. Prepare Azure CLI and hosting variables
+
+Run each command successfully before continuing. Provider registration can take
+several minutes and requires subscription permission.
+
+```powershell
+az extension add --name containerapp --upgrade
+az bicep install
+az provider register --subscription $subscription --namespace Microsoft.App --wait
+az provider register --subscription $subscription --namespace Microsoft.OperationalInsights --wait
+az provider register --subscription $subscription --namespace Microsoft.ContainerRegistry --wait
+az provider register --subscription $subscription --namespace Microsoft.ManagedIdentity --wait
+
+$location = 'eastus2'
+$group = '<new-hosting-resource-group>'
+$registry = '<globally-unique-lowercase-alphanumeric-acr-name>'
+$app = '<new-container-app-name>'
+$voiceEndpoint = 'https://<your-foundry-resource>.services.ai.azure.com'
+$liveEndpoint = 'https://<your-gpt-live-resource>.openai.azure.com'
+$liveDeployment = '<your-actual-gpt-live-deployment-name>'
+$version = 'recognition-uat-20261104-r2'
+$credentialsFile = '.local\credentials.parameters.json'
+```
+
+Use approved, unused names, not an existing production app. ACR names are 5-50
+alphanumeric characters; app names must be lowercase, start with a letter, contain
+only letters/digits/single hyphens, end with a letter/digit, and be shorter than
+32 characters.
+
+### 2. Create the registry and build the image
+
+```powershell
+az group create --subscription $subscription --name $group --location $location -o none
+az acr create --subscription $subscription --resource-group $group --name $registry `
+  --location $location --sku Basic -o none
+az acr config authentication-as-arm show --subscription $subscription --registry $registry
+```
+
+The registry must allow ARM-audience tokens for managed-identity image pulls.
+If the preceding command reports `disabled`, obtain approval and run
+`az acr config authentication-as-arm update --subscription $subscription --registry $registry --status enabled`.
+Do not change an existing registry's policy without approval. Use ordinary ACR
+RBAC mode; this template grants `AcrPull`, not ABAC repository permissions.
+
+```powershell
+az acr build --subscription $subscription --registry $registry `
+  --image "recognition-uat:$version" --file Dockerfile .
+if ($LASTEXITCODE -ne 0) { throw 'Image build failed; stop before deployment.' }
+$server = az acr show --subscription $subscription --name $registry --query loginServer -o tsv
+$digest = az acr repository show --subscription $subscription --name $registry `
+  --image "recognition-uat:$version" --query digest -o tsv
+if ($LASTEXITCODE -ne 0 -or -not $digest) { throw 'Cannot resolve the built image digest.' }
+$image = "$server/recognition-uat@$digest"
+```
+
+ACR builds the Dockerfile remotely; Docker Desktop is not required for this path.
+The image is pinned by digest rather than a mutable tag.
+
+### 3. Choose and save your portal login
+
+```powershell
+.\.venv\Scripts\python.exe tools\make_credentials.py --username developer --out $credentialsFile
+if ($LASTEXITCODE -ne 0) { throw 'Credential generation failed; stop before deployment.' }
+```
+
+**You choose the password at the two hidden prompts.** Use 12-256 characters and
+save it in an approved password manager. After deployment, log in as **`developer`
+with that same chosen password**. There is no password generated by Azure to
+retrieve afterward.
+
+The ignored file `.local\credentials.parameters.json` contains the username,
+password **hash** and session-signing secret, **not the original password**.
+Restrict its filesystem access to your account and never commit or share it.
+The tool refuses to overwrite an existing file; for a different deployment or
+rotation, choose a new filename under `.local` and set `$credentialsFile` to it.
+
+### 4. Deploy the application
+
+```powershell
+az deployment group create --subscription $subscription --resource-group $group `
+  --name recognition-uat-hosting --template-file infra\hosting.bicep `
+  --parameters "@$credentialsFile" `
+  --parameters appName=$app registryName=$registry containerImage=$image location=$location `
+    voiceLiveEndpoint=$voiceEndpoint gptLiveEndpoint=$liveEndpoint `
+    gptLiveDeployment=$liveDeployment appVersion=$version -o none
+if ($LASTEXITCODE -ne 0) { throw 'Hosting deployment failed; inspect the deployment before continuing.' }
+
+$principal = az deployment group show --subscription $subscription --resource-group $group `
+  --name recognition-uat-hosting --query properties.outputs.principalId.value -o tsv
+$url = az deployment group show --subscription $subscription --resource-group $group `
+  --name recognition-uat-hosting --query properties.outputs.url.value -o tsv
+```
+
+This creates an HTTPS-only Container App, its user-assigned managed identity,
+an `AcrPull` assignment and a managed environment. It stores login values as app
+secrets. It does **not** grant the identity Foundry inference access: do the next
+step before testing audio. See the [hosting guide](docs/azure-hosting.md) if initial
+image pull is delayed by role propagation.
+
+### 5. Grant the application's identity inference access
+
+Run these commands as an administrator allowed to assign roles at the AI resource
+scope. `$principal` is the new **app identity**, not the deployer's user.
+Use the actual full resource IDs recorded during Foundry setup:
+
+```powershell
+$voiceSubscription = $subscription
+$liveSubscription = $subscription
+$voiceResourceId = '<full-Voice-Live-Foundry-resource-id>'
+$liveResourceId = '<full-GPT-Live-Foundry-resource-id>'
+
+az role assignment create --subscription $voiceSubscription --assignee-object-id $principal `
+  --assignee-principal-type ServicePrincipal --scope $voiceResourceId `
+  --role 'f2dc8367-1007-4938-bd23-fe263f013447' -o none
+az role assignment create --subscription $liveSubscription --assignee-object-id $principal `
+  --assignee-principal-type ServicePrincipal --scope $liveResourceId `
+  --role '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd' -o none
+```
+
+These are **Cognitive Services Speech User** and **Cognitive Services OpenAI User**.
+If AI resources use other subscriptions, change the corresponding subscription
+variables; this managed-identity path assumes the resources trust the same Entra
+tenant. If both endpoints belong to one resource, use its ID for both roles.
+Allow time for role propagation, and confirm both assignments succeeded.
+
+### 6. Open the hosted portal and sign in
+
+```powershell
+Write-Output "$url/recognition/uat"
+Write-Output "$url/recognition"
+```
+
+Open the printed HTTPS URL. Username: **`developer`**. Password: **the one you chose
+in step 3**, not an Azure-generated secret. Follow [your first microphone
+test](#your-first-microphone-test). A healthy revision or `/health` response alone
+does not prove model access.
+
+Keep the chosen username/password in an approved password manager. After deployment
+and validation, remove only the temporary parameter file once you have followed
+your secret-retention policy; do not delete the whole `.local` directory. Future
+deployments must supply the intended login secrets again, not accidentally rotate
+them or reintroduce an old password.
 
 The shared password is a demonstration access gate, **not production authentication**.
 For production, add real Entra authentication/authorization, centralized rate limits,
 appropriate network isolation, credential lifecycle controls and retention policies.
+
+## Signing in and passwords
+
+| Situation | What to use or do |
+|---|---|
+| You started the local launcher | Username from `--username` (`developer` above), password entered at that launch. Nothing is written to `access.json`. |
+| You deployed to Azure | Username passed to `make_credentials.py`, password entered when generating the parameter file used for that deployment. |
+| Somebody else deployed the portal | Ask that maintainer for the URL and shared login through an approved private channel. Your Azure/GitHub account password will not work as a portal password. |
+| Local password forgotten | Stop the server with Ctrl+C and run the launcher again; choose a new password and sign in again. |
+| Hosted password forgotten | The deploying administrator must [rotate the login and restart active revisions](docs/azure-hosting.md#resetting-a-forgotten-hosted-password). A stored hash cannot recover the original password. |
+
+The repository ships no working password and does not create an `access.json`.
+Do not confuse `portalPasswordHash` or `portalSessionSecret` with a login password.
+All browser users of one deployment share its configured demo login; browser login
+does not authenticate each user separately to Entra. The local backend uses its
+CLI user's Azure identity; the hosted backend uses its managed identity.
+
+## Your first microphone test
+
+After signing in to `/recognition/uat`, select a synthetic case, click
+**啟用既有三模型功能**, tick consent, click **開始同題比較**, and allow the microphone.
+Wait until all three lanes show **正在聆聽**, then speak and pause about two seconds.
+End the recording and wait for final results before changing cases or instructions.
+Grade what was actually spoken, not a different suggested utterance.
+
+If a lane fails, do not treat it as a pass because the web page loaded. Check
+resource/model access, deployment name, the **runtime identity's** permissions,
+quota and WebRTC/network reachability. Use only synthetic inputs; see
+[troubleshooting](#privacy-measurements-and-troubleshooting).
 
 ## Configuration
 
@@ -213,6 +449,8 @@ It does not contain Azure credentials or become an independent cloud service.
 | Symptom | Check |
 |---|---|
 | Audio controls disabled in a downloaded HTML | Intentional offline mode. Use the protected hosted page or configured localhost. |
+| No password or `access.json` after clone/deploy | No default password or such file is generated. Use the password you chose at the local/credential-tool prompts, or ask the deployment maintainer. |
+| Forgot the hosted password | An administrator must rotate login secrets and restart active revisions; see the hosting guide. The hash is not the password. |
 | HTTP 503 on login | Missing/partial portal credentials; use the local launcher or configure all three secret values. |
 | Lane is unavailable | Missing endpoint. The portal does not replace unavailable providers. |
 | Lane fails at startup | Resource/model/API access, deployment name, Entra roles, quota, network reachability; inspect sanitized server error codes. |

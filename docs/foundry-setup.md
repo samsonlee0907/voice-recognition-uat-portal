@@ -11,6 +11,12 @@ Check the current [Voice Live model/region table][regions] and GPT-Live access i
 own subscription before creating anything. Availability and inference processing
 scope are not necessarily the same as the resource location.
 
+First complete [source/tool setup](../README.md#get-the-source-and-tools) and
+select the intended Entra tenant/subscription. Creating a resource requires
+control-plane permission; assigning inference roles requires separate
+role-assignment permission. Both configured AI resources must accept tokens from
+the runtime identity's tenant for the authentication paths in this repository.
+
 For a **new development resource**, the optional template can be deployed from
 PowerShell after choosing your own subscription/group/name:
 
@@ -18,6 +24,7 @@ PowerShell after choosing your own subscription/group/name:
 $subscription = '<your-subscription-id>'
 $group = '<new-or-approved-development-resource-group>'
 $foundry = '<globally-unique-foundry-resource-name>'
+az provider register --subscription $subscription --namespace Microsoft.CognitiveServices --wait
 az group create --subscription $subscription --name $group --location eastus2
 az deployment group create --subscription $subscription --resource-group $group `
   --template-file infra\foundry.bicep --parameters name=$foundry location=eastus2
@@ -55,6 +62,19 @@ Realtime model if access is unavailable: report the missing lane explicitly.
   resource's supported `.cognitiveservices.azure.com` root.
 - `GPT_LIVE_ENDPOINT`: `https://<name>.openai.azure.com`.
 - `GPT_LIVE_DEPLOYMENT`: the actual GPT-Live deployment name.
+
+Also record each resource's **full resource ID** and **subscription ID** for
+permission assignments. In the Azure portal, open the Foundry resource's
+**Overview -> JSON View** and copy `id`, or query your approved resource:
+
+```powershell
+az cognitiveservices account show --subscription '<ai-resource-subscription-id>' `
+  --resource-group '<ai-resource-group>' --name '<ai-resource-name>' `
+  --query '{resourceId:id,endpoint:properties.endpoint}' -o json
+```
+
+If the two endpoints use one resource, its ID is used for both roles. If they use
+different resources, record both IDs/subscriptions.
 
 Use **resource roots**, not a Foundry project URL, portal URL, `/openai/v1` URL or
 WebSocket URL. The application adds paths and API versions.
@@ -98,6 +118,13 @@ az role assignment create --subscription $subscription --assignee-object-id $pri
 ```
 
 Use `--assignee-principal-type User` instead for a developer user.
+To find your own CLI user's object ID, use
+`az ad signed-in-user show --query id -o tsv` after signing in to the correct
+tenant, or ask your tenant administrator for the object ID in that tenant.
+An administrator can then grant that user **both** documented role IDs, on the
+Voice Live and GPT-Live resource scopes respectively. The
+[Azure hosting walkthrough](azure-hosting.md#5-authorize-the-new-app-identity)
+provides the concrete assignment commands for the app's managed identity.
 The application requests `https://ai.azure.com/.default` and never sends an Azure
 token or API key to the browser. Do not give the app Owner/Contributor simply to
 avoid diagnosing an inference permission error.
