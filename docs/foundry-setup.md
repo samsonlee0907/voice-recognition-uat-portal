@@ -102,6 +102,53 @@ The application requests `https://ai.azure.com/.default` and never sends an Azur
 token or API key to the browser. Do not give the app Owner/Contributor simply to
 avoid diagnosing an inference permission error.
 
+### Local development: Azure CLI identity
+
+The [Windows quick start](../README.md#quick-start-on-windows) runs the complete
+portal on loopback; Azure Container Apps, ACR and a managed identity are not
+required. The Foundry resource/model prerequisites above still apply.
+
+1. Sign in with `az login`. For a resource in another tenant, use
+   `az login --tenant '<resource-tenant-id>'`.
+2. Select your approved subscription with
+   `az account set --subscription '<your-subscription-id>'` and supply the same
+   subscription to `tools\run_local.py --subscription`.
+3. Ensure this signed-in **developer user**, or an approved group they belong to,
+   has the resource-scoped inference roles described above. A hosted app's role
+   assignments do not automatically grant the developer access.
+4. Run the launcher from the README and choose a new local portal password.
+   The password is only a local demo gate, not a Microsoft/Entra credential.
+5. Open `http://localhost:8000/recognition/uat`, explicitly start a synthetic test,
+   and confirm all three lanes produce output. Use `--port` for a different free
+   local port.
+
+The runtime authentication chain is:
+
+```text
+az login -> Azure CLI's signed-in identity
+         -> AzureCliCredential(subscription=<explicit subscription>)
+         -> token for https://ai.azure.com/.default
+         -> backend Authorization: Bearer header -> configured Azure AI resource
+```
+
+`tools\run_local.py` sets `AZURE_AUTH_MODE=cli` explicitly. It does not attempt
+managed-identity authentication or fall through to a different credential when
+CLI authentication fails. A subscription selects the CLI account context; it
+does not grant access to the configured endpoint.
+
+The backend obtains Azure tokens and uses them for Voice Live and GPT-Live
+session/sideband requests. Those Entra tokens are not sent to browser JavaScript.
+The browser sends the shared microphone stream to the local backend for Voice
+Live and uses WebRTC media for native GPT-Live. No Azure resource API key, app
+registration or client secret is required for this developer-account path.
+
+The launcher binds only to `127.0.0.1`; its HTTP-cookie exception accepts only
+loopback hosts and clients. Keep the browser on `localhost`, not a LAN address.
+If `az login` expires or Conditional Access requires reauthentication, sign in
+again in the correct tenant. Diagnose 401/403 errors against the **local user's**
+permissions, token tenant, resource endpoint and role propagation rather than
+copying a hosted managed identity's client ID.
+
 ## 5. Confirm functionality, not just provisioning
 
 Start the app, log in, select a synthetic case, explicitly enable/consent/start, and
@@ -111,6 +158,31 @@ inspect heard/processed output. Then exercise negatives and silence.
 `/health`, a populated deployment list, and a 200 configuration response do not
 prove model access or successful browser media. A proxy/firewall can still block
 WebRTC even while HTTPS and the backend WebSocket work.
+
+### Recorded local smoke: November 4, 2026
+
+The published `tools\run_local.py` entry point was exercised on Windows with
+Python 3.12, loopback HTTP and real `AzureCliCredential` authentication against
+existing qualified Foundry endpoints. No Azure hosting resources, identities or
+role assignments were created or changed. The developer account already had
+broader permissions including Cognitive Services User and Foundry User; this was
+not a new least-privilege developer-account qualification.
+
+Both portal pages reached listening on all three providers. Synthetic audio was
+fed through one browser microphone stream, exercising the real browser worklet,
+backend WebSocket, Azure inference and native GPT-Live WebRTC/sideband path:
+
+| Synthetic input | Speech + Luna | Native Realtime | Native GPT-Live |
+|---|---|---|---|
+| Generic code: `D E M O` followed by sixty-three | `DEMO63` | `DEMO63` | `DEMO63` |
+| Renewal through the generic telecom service app | `{"status":"valid","value":"online"}` | `{"status":"valid","value":"online"}` | `{"status":"valid","value":"online"}` |
+
+Portal login, unauthenticated access gates, rejection of non-loopback HTTP hosts,
+localhost's browser secure context and clean native-session stop were also
+checked; no browser script errors were observed. Password-prompt input alone was
+automated for the test. Azure credentials and model outputs were not mocked.
+This is functional smoke evidence, not physical-microphone, human-accent,
+telephony-accuracy or fresh-subscription provisioning evidence.
 
 ## Primary sources
 
@@ -123,6 +195,8 @@ Reviewed November 4, 2026:
 - [GPT-Live prerequisites, model deployment and sideband connection][live]
 - [GPT-Live strict session configuration and timed fragments][liveref]
 - [DefaultAzureCredential for Python][identity]
+- [AzureCliCredential and explicit subscription selection][clicredential]
+- [Local development with an Entra developer account][localauth]
 - [Built-in Speech/OpenAI role data actions][roles]
 
 [voice]: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/voice-live#supported-models-and-regions
@@ -132,4 +206,6 @@ Reviewed November 4, 2026:
 [live]: https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/gpt-live
 [liveref]: https://learn.microsoft.com/en-us/azure/foundry/openai/gpt-live-reference
 [identity]: https://learn.microsoft.com/en-us/python/api/azure-identity/azure.identity.aio.defaultazurecredential
+[clicredential]: https://learn.microsoft.com/en-us/python/api/azure-identity/azure.identity.aio.azureclicredential
+[localauth]: https://learn.microsoft.com/en-us/azure/developer/python/sdk/authentication/local-development-dev-accounts
 [roles]: https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/ai-machine-learning

@@ -95,6 +95,18 @@ launcher publicly or enable `ALLOW_INSECURE_LOCALHOST` in hosting.
 On macOS/Linux, use `python3`, `.venv/bin/python`, and ordinary shell line
 continuation instead of the PowerShell examples. All Python paths are portable.
 
+**Two different sign-ins:** `az login` authenticates your developer account to
+Azure. The username/password chosen by the launcher only protect the local portal;
+they do not authorize Foundry access. The launcher explicitly selects
+`AzureCliCredential` for `--subscription`, not the hosted app's managed identity.
+Your developer account needs its own inference permissions on the configured
+resource(s). No Azure API key, app registration or client secret is needed for this
+local path. See [local authentication](docs/foundry-setup.md#local-development-azure-cli-identity).
+
+Running locally provisions no Azure hosting resources, but inference still runs
+on the configured Azure services and incurs their normal usage charges. A working
+local test does not mean the models run offline.
+
 ## Hosted deployment
 
 See [Azure Container Apps deployment](docs/azure-hosting.md). It documents resource
